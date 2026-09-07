@@ -27,6 +27,8 @@ const page = await context.newPage();
 const errors = [];
 page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errors.push(`[${m.type()}] ${m.text()}`); });
 page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`));
+page.on('response', (r) => { if (r.status() >= 400) errors.push(`[http ${r.status()}] ${r.url()}`); });
+page.on('requestfailed', (r) => { if (!/cloudfront|googleapis|gstatic/.test(r.url())) errors.push(`[failed] ${r.url()} ${r.failure()?.errorText}`); });
 
 for (const p of paths) {
   errors.length = 0;
@@ -34,7 +36,7 @@ for (const p of paths) {
   const t0 = Date.now();
   await page.goto(url, { waitUntil: 'load', timeout: 60000 });
   await page.waitForTimeout(wait);
-  if (scrollTo !== null) { await page.evaluate((y) => window.scrollTo(0, y), scrollTo); await page.waitForTimeout(1200); }
+  if (scrollTo !== null) { await page.evaluate((y) => { document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, y); }, scrollTo); await page.waitForTimeout(Number(process.env.SHOT_SCROLL_WAIT || 1800)); }
   const name = (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '_')) + (scrollTo !== null ? `_s${scrollTo}` : '');
   const file = `${OUT}/${name}.png`;
   await page.screenshot({ path: file, fullPage });

@@ -1,0 +1,3 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Dev: BunkerViz</title><link rel="stylesheet" href="/src/styles/main.css" /><style>body{padding:100px 0}</style></head>
+<body><div class="container"><div id="m"></div></div>
+<script type="module">import { mountBunkerViz } from '/src/modules/BunkerViz.js'; const q = new URLSearchParams(location.search); mountBunkerViz(document.getElementById('m'), Object.fromEntries(q.entries()));</script></body></html>

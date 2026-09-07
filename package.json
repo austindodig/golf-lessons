@@ -9,7 +9,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "shots": "node tools/screenshot.mjs",
-    "images": "node tools/localize-images.mjs"
+    "images": "node tools/localize-images.mjs",
+    "gen": "node tools/generate-pages.mjs",
+    "prebuild": "node tools/generate-pages.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

@@ -59,13 +59,13 @@ export function mountSwingViewer(root, preset = {}) {
   if (preset.caption) root.append(h('div.module__caption', preset.caption));
 
   // Scene
-  const stage = createStage(stageEl, { fov: 34, near: 0.05, far: 300, exposure: 1.05, postfx: { bloom: { strength: 0.5, radius: 0.55, threshold: 0.8 }, vignette: 0.55, grain: 0.03 } });
+  const stage = createStage(stageEl, { fov: 34, near: 0.05, far: 300, exposure: 1.05, postfx: { bloom: { strength: 0.38, radius: 0.5, threshold: 0.88 }, vignette: 0.5, grain: 0.03 } });
   let model, rig, plane, trail, ribbon, ball, tee, controls, motes, headPath = [], trailTotal = 0;
   const sunDir = new THREE.Vector3(-0.55, 0.16, -0.8);
   if (stage) {
     const { scene, camera, renderer } = stage;
     buildEnvironment(renderer, scene, { sunDir, fogDensity: 0.02, fogColor: '#0a161b', sunIntensity: 1.9, shadows: false, skyIntensity: 0.95 });
-    scene.add(createRangeGround({ fairwayHalf: 14, sunDir, stripeWidth: 2.5, stripeDir: 1, size: 300, behind: 40 }));
+    scene.add(createRangeGround({ fairwayHalf: 14, sunDir, stripeWidth: 2.5, stripeDir: 1, size: 300, behind: 40, glint: 0.08 }));
     // practice mat + alignment lines
     const mat = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.3), new THREE.MeshStandardMaterial({ color: 0x0e1c16, roughness: 0.95 }));
     mat.rotation.x = -Math.PI / 2; mat.position.set(-0.55, 0.004, 0.05); scene.add(mat);
@@ -106,9 +106,9 @@ export function mountSwingViewer(root, preset = {}) {
       uniforms: { color: { value: new THREE.Color(0xf3cf7a) }, color2: { value: new THREE.Color(0x6ee7a8) } },
       vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
       fragmentShader: `uniform vec3 color, color2; varying vec2 vUv;
-        void main(){ vec2 g = abs(fract(vUv * vec2(14.0, 11.0)) - 0.5); float line = 1.0 - smoothstep(0.0, 0.06, min(g.x, g.y));
-          float edge = smoothstep(0.0, 0.25, vUv.x) * smoothstep(0.0, 0.25, 1.0 - vUv.x) * smoothstep(0.0, 0.2, vUv.y) * smoothstep(0.0, 0.25, 1.0 - vUv.y);
-          vec3 c = mix(color2, color, vUv.y); gl_FragColor = vec4(c, (0.05 + line * 0.28) * edge); }`,
+        void main(){ vec2 g = abs(fract(vUv * vec2(8.0, 6.0)) - 0.5); float line = 1.0 - smoothstep(0.0, 0.05, min(g.x, g.y));
+          float edge = smoothstep(0.0, 0.25, vUv.x) * smoothstep(0.0, 0.25, 1.0 - vUv.x) * smoothstep(0.08, 0.35, vUv.y) * smoothstep(0.0, 0.25, 1.0 - vUv.y);
+          vec3 c = mix(color2, color, vUv.y); gl_FragColor = vec4(c, (0.04 + line * 0.2) * edge); }`,
     });
     const mesh = new THREE.Mesh(geo, mat);
     // Orient: plane spanned by e1 (target line) and e2, passing through the ball, centred a bit up the plane.

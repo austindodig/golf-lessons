@@ -3,10 +3,244 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>WebGL smoke test</title>
-<style>html,body{margin:0;background:#060a0d;height:100%}canvas{display:block}</style>
+<title>Fairway Institute · Learn golf from the physics up</title>
+<meta name="description" content="An interactive Three.js golf academy. Nine lessons, one for every swing, each with a physics-driven 3D tool: a ball flight lab, a swing plane viewer, a green reader and more." />
+<meta property="og:title" content="Fairway Institute · Learn golf from the physics up" />
+<meta property="og:description" content="Nine interactive lessons, one for every swing, built on the ball-flight laws." />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#060a0d" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/src/styles/main.css" />
+<script type="module" src="/src/pages/home.js"></script>
 </head>
-<body>
-<script type="module" src="/src/smoke.js"></script>
+<body class="page-home" data-lesson="home">
+<!-- nav:start -->
+<header class="nav" id="nav">
+  <div class="container--wide nav__inner">
+    <a class="nav__brand" href="/" aria-label="Fairway Institute home"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14.5" fill="none" stroke="#6ee7a8" stroke-width="1.5"/><circle cx="16" cy="16" r="6" fill="#f3cf7a"/><path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="#6ee7a8" stroke-width="1.5" stroke-linecap="round"/></svg><span>Fairway<span class="muted"> Institute</span></span></a>
+    <nav class="nav__links" id="nav-links" aria-label="Primary">
+      <button type="button" data-open-drawer>Curriculum</button>
+      <a href="/lessons/swing/" >The Swing</a>
+      <a href="/lessons/ball-flight/" >Flight Lab</a>
+      <a href="/lessons/putting/" >Putting</a>
+      <button type="button" class="nav__audio" data-audio-toggle aria-pressed="false" title="Sound"><span class="nav__audio-ic" aria-hidden="true"></span><span>Sound</span></button>
+      <a class="btn btn--primary btn--sm nav__cta" href="/lessons/setup/">Start learning</a>
+    </nav>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-controls="nav-links" data-nav-toggle><span></span></button>
+    <div class="nav__progress" id="nav-progress"></div>
+  </div>
+</header>
+<!-- nav:end -->
+<main>
+  <section class="hero" id="top">
+    <div class="hero__bg" data-hero-bg></div>
+    <div class="hero__veil"></div>
+    <div class="hero__stage" data-hero-stage></div>
+    <div class="container hero__inner">
+      <span class="kicker">An interactive golf academy</span>
+      <h1 class="hero__title">Learn golf from the <em>physics</em> up.</h1>
+      <p class="lede hero__sub">Nine lessons, one for every swing. Each one teaches with a real 3D tool: a ball-flight lab that runs the aerodynamics, a swing you can scrub through ten positions, a green that breaks the way greens break.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="/lessons/setup/">Start with the setup <span class="arrow">→</span></a>
+        <a class="btn" href="/lessons/ball-flight/#nine-flights">Open the Ball Flight Lab</a>
+      </div>
+      <div class="hero__stats">
+        <div><b>9</b><span>Lessons</span></div>
+        <div><b>8</b><span>Interactive 3D tools</span></div>
+        <div><b>45</b><span>Checkpoint questions</span></div>
+        <div><b>0</b><span>Sign-ups required</span></div>
+      </div>
+    </div>
+    <div class="hero__scrollhint" aria-hidden="true"><i></i><span>Scroll</span></div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="kicker">How it teaches</span>
+        <h2>Cause and effect, not tips.</h2>
+        <p class="lede">Golf instruction is full of feels that work for one player and wreck the next. Every lesson here starts from what the ball actually does at impact, then builds the motion that produces it. The tools let you move the numbers and watch the result.</p>
+      </div>
+      <div class="features">
+        <div class="feature reveal">
+          <div class="feature__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18c4-10 10-13 18-13M3 18h18"/><circle cx="6" cy="16" r="1.4" fill="currentColor"/></svg></div>
+          <h3>Ball Flight Lab</h3>
+          <p>Set club speed, attack angle, path and face. Watch drag and Magnus lift shape the flight, read carry, apex, spin and curve, and learn the nine ball flights by producing them.</p>
+          <a href="/lessons/ball-flight/">Fly a shot →</a>
+        </div>
+        <div class="feature reveal">
+          <div class="feature__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-4 6M12 13l4 6M8 10l4 3 5-4"/></svg></div>
+          <h3>Swing Plane Viewer</h3>
+          <p>An orbitable swing driven by a double-pendulum model on Hogan's pane of glass. Scrub from address to finish through P1 to P10, with shoulder turn, hip turn and wrist set read out live.</p>
+          <a href="/lessons/swing/">Scrub the swing →</a>
+        </div>
+        <div class="feature reveal">
+          <div class="feature__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="15" rx="9" ry="5"/><path d="M4 13c2-6 8-8 12-4M16 9l1-3"/><circle cx="8" cy="16" r="1.2" fill="currentColor"/></svg></div>
+          <h3>Green Reader</h3>
+          <p>A green that tilts, a ball that rolls under gravity and friction, and a hole that only accepts putts arriving at the right pace. Read the break, pick a line, and watch it happen.</p>
+          <a href="/lessons/putting/">Read a putt →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="curriculum">
+    <div class="container">
+      <div class="section__head reveal">
+        <span class="kicker kicker--gold">The curriculum</span>
+        <h2>One lesson for every swing.</h2>
+        <p class="lede">Work through in order or jump straight to the shot that costs you strokes. Your progress and quiz scores stay in this browser.</p>
+      </div>
+      <div class="lcards">
+        <!-- curriculum:start -->
+        <a class="lcard reveal" href="/lessons/setup/" data-lesson-card="setup" style="--i:1">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_dcdb60d2-39f5-48db-8143-49825f8b14c7.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">01</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>The Setup</h3>
+            <p>Grip, stance, posture, alignment and ball position: the five static checkpoints that give every swing a fair chance before the club ever moves.</p>
+            <div class="lcard__meta mono"><span>Fundamentals</span><span>20 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/swing/" data-lesson-card="swing" style="--i:2">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_db0920b9-6b64-4074-8484-9673d3ad609b.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">02</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>The Full Swing</h3>
+            <p>The full swing as a single motion, read through the P1 to P10 checkpoints: plane, sequence, width, tempo, impact, and what your finish tells you.</p>
+            <div class="lcard__meta mono"><span>Foundations</span><span>35 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/driver/" data-lesson-card="driver" style="--i:3">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_184806_99495049-a427-4ce3-a48d-404a6e5e09cf.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">03</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>The Driver</h3>
+            <p>Why the driver is the only club you strike on the upswing, how to set up for it, and how launch, spin and strike location turn clubhead speed into carry.</p>
+            <div class="lcard__meta mono"><span>Full swing</span><span>25 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/irons/" data-lesson-card="irons" style="--i:4">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_6cc3ebb2-9813-4b35-a071-3f75b0ae6efb.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">04</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>Irons</h3>
+            <p>The descending strike that makes irons work: low point ahead of the ball, shaft lean and weight forward at impact, plus honest distance gapping and trajectory control.</p>
+            <div class="lcard__meta mono"><span>Full swing</span><span>25 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/wedges/" data-lesson-card="wedges" style="--i:5">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_c67bb4cb-240f-42ab-859a-2c962371d571.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">05</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>Wedges &amp; Pitching</h3>
+            <p>Build a body-driven pitching motion, then use the clock system to turn four wedges into twelve reliable carry numbers you can trust from 30 to 100 yards.</p>
+            <div class="lcard__meta mono"><span>Short game</span><span>30 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/chipping/" data-lesson-card="chipping" style="--i:6">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_255dd4c9-adb3-48d3-8cbf-81dc2f502531.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">06</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>Chipping</h3>
+            <p>Learn the chip as a lofted putting stroke, pick a landing spot every time, and use carry-to-roll ratios to choose the club that gets the ball rolling soonest.</p>
+            <div class="lcard__meta mono"><span>Short game</span><span>25 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/bunker/" data-lesson-card="bunker" style="--i:7">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_71c490f6-6fb4-48d3-9b0e-8dbc8ec794ca.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">07</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>Bunker Play</h3>
+            <p>Understand bounce, open the face before you grip, splash a dollar bill of sand from two inches behind the ball, and finish every swing.</p>
+            <div class="lcard__meta mono"><span>Short game</span><span>25 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/putting/" data-lesson-card="putting" style="--i:8">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_d80fcb57-1cf6-47cc-8acb-b1fdf81370d1.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">08</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>Putting</h3>
+            <p>Setup, the pendulum stroke, launch and roll, pace and the lag zone, reading slope to an aim point, and three drills that make it repeatable.</p>
+            <div class="lcard__meta mono"><span>On the green</span><span>30 min</span></div>
+          </div>
+        </a>
+        <a class="lcard reveal" href="/lessons/ball-flight/" data-lesson-card="ball-flight" style="--i:9">
+          <div class="lcard__img"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_184806_61dc1a13-ef8f-4851-9d65-3a5ddc4f0501.png" alt="" loading="lazy" /></div>
+          <div class="lcard__body">
+            <div class="lcard__top"><span class="mono">09</span><span class="lcard__done" aria-hidden="true"></span></div>
+            <h3>The Ball Flight Laws</h3>
+            <p>The modern ball flight laws: the face sets the start, face-to-path sets the curve, gear effect, spin loft, why a slice happens, and how to diagnose yourself from divot and flight.</p>
+            <div class="lcard__meta mono"><span>The lab</span><span>30 min</span></div>
+          </div>
+        </a>
+        <!-- curriculum:end -->
+      </div>
+    </div>
+  </section>
+
+  <section class="flyover" id="course">
+    <div class="flyover__pin" data-flyover>
+      <div class="flyover__stage" data-flyover-stage></div>
+      <div class="flyover__copy">
+        <span class="kicker">Course management</span>
+        <h2>Play the hole backwards.</h2>
+        <p>Scroll to fly the hole. Start from the pin, find the side of the green that leaves an uphill putt, pick the fairway spot that opens that angle, then choose the club off the tee that reaches it.</p>
+      </div>
+      <div class="flyover__hud" data-flyover-hud>
+        <div class="flyover__step is-active"><b>1 · Pin</b>Start here. The green tilts back to front, so the putt you want is uphill from below the hole.</div>
+        <div class="flyover__step"><b>2 · Green</b>Two bunkers guard the right. Missing left or long leaves a chip up the slope; missing right leaves sand.</div>
+        <div class="flyover__step"><b>3 · Approach</b>From the left half of the fairway the green opens up and the bunkers sit out of the picture.</div>
+        <div class="flyover__step"><b>4 · Tee</b>The fairway is widest at 230 yards, short of the pond. A 3-wood to that spot beats a driver into trouble.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta__glow"></div>
+    <div class="container reveal">
+      <span class="kicker">Begin</span>
+      <h2>The grip is where every good shot starts.</h2>
+      <p>Lesson one takes twenty minutes and builds the setup that every other lesson relies on. Do it once, properly, and the rest of the curriculum gets easier.</p>
+      <a class="btn btn--gold" href="/lessons/setup/">Start lesson 01 <span class="arrow">→</span></a>
+    </div>
+  </section>
+</main>
+<!-- footer:start -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <h4>Fairway Institute</h4>
+        <p>An interactive golf academy built on the ball-flight laws. Every tool on this site runs real physics in your browser so the lessons show you the cause, not just the cure.</p>
+      </div>
+      <div><h4>Curriculum</h4>
+        <a href="/lessons/setup/">01 The Setup</a>
+        <a href="/lessons/swing/">02 The Full Swing</a>
+        <a href="/lessons/driver/">03 The Driver</a>
+        <a href="/lessons/irons/">04 Irons</a>
+        <a href="/lessons/wedges/">05 Wedges &amp; Pitching</a>
+        <a href="/lessons/chipping/">06 Chipping</a>
+        <a href="/lessons/bunker/">07 Bunker Play</a>
+        <a href="/lessons/putting/">08 Putting</a>
+        <a href="/lessons/ball-flight/">09 The Ball Flight Laws</a>
+      </div>
+      <div><h4>Tools</h4>
+        <a href="/lessons/ball-flight/#nine-flights">Ball Flight Lab</a>
+        <a href="/lessons/swing/">Swing Plane Viewer</a>
+        <a href="/lessons/putting/">Green Reader</a>
+        <a href="/lessons/wedges/">Wedge Clock</a>
+        <a href="/lessons/chipping/">Chip Calculator</a>
+      </div>
+      <div><h4>About</h4>
+        <p>Built with Three.js. Backdrops generated with Higgsfield. Progress is stored only in your browser.</p>
+        <p class="footer__ai">Right-handed golfer shown throughout; left-handers mirror everything.</p>
+      </div>
+    </div>
+    <div class="footer__bottom"><span>© 2026 Fairway Institute</span><span>Play well. Practise with purpose.</span></div>
+  </div>
+</footer>
+<div class="grain" aria-hidden="true"></div>
+<!-- footer:end -->
 </body>
 </html>

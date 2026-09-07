@@ -17,6 +17,14 @@ export function createGrassMaterial(opts = {}) {
       stripeDir: { value: opts.stripeDir ?? 0 },  // 0 = across the target line, 1 = along it
       greenCenter: { value: opts.greenCenter || new THREE.Vector3(0, 0, -99999) },
       greenRadius: { value: opts.greenRadius ?? 0 },
+      pathPts: { value: (opts.pathPts || []).concat(Array(8).fill(new THREE.Vector3())).slice(0, 8) },
+      pathCount: { value: opts.pathPts ? opts.pathPts.length : 0 },
+      bunkers: { value: (opts.bunkers || []).concat(Array(5).fill(new THREE.Vector4())).slice(0, 5) },
+      bunkerCount: { value: opts.bunkers ? opts.bunkers.length : 0 },
+      water: { value: opts.water || new THREE.Vector4(0, 0, 0, 0) },
+      sandColor: { value: new THREE.Color('#cbb98f') },
+      waterColor: { value: new THREE.Color('#0a2430') },
+      glint: { value: opts.glint ?? 0.35 },
       time: { value: 0 },
     },
   ]);
@@ -35,8 +43,10 @@ export function createGrassMaterial(opts = {}) {
       }`,
     fragmentShader: /* glsl */`
       #include <fog_pars_fragment>
-      uniform vec3 fairwayColorA, fairwayColorB, roughColor, greenColor, sunDir, sunColor, greenCenter;
-      uniform float fairwayHalf, stripeWidth, stripeDir, greenRadius, time;
+      uniform vec3 fairwayColorA, fairwayColorB, roughColor, greenColor, sunDir, sunColor, greenCenter, sandColor, waterColor;
+      uniform float fairwayHalf, stripeWidth, stripeDir, greenRadius, time, glint;
+      uniform vec3 pathPts[8]; uniform int pathCount; uniform vec4 bunkers[5]; uniform int bunkerCount; uniform vec4 water;
+      float segDist(vec2 p, vec2 a, vec2 b) { vec2 ab = b - a; float t = clamp(dot(p - a, ab) / max(dot(ab, ab), 1e-4), 0.0, 1.0); return distance(p, a + ab * t); }
       varying vec3 vWorld; varying vec3 vNormalW;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float noise(vec2 p) {
@@ -48,6 +58,11 @@ export function createGrassMaterial(opts = {}) {
         float n = noise(p * 0.8) * 0.6 + noise(p * 3.1) * 0.3 + noise(p * 11.0) * 0.1;
         float edgeWobble = (noise(vec2(p.y * 0.05, 0.0)) - 0.5) * 6.0;
         float dx = abs(p.x - edgeWobble);
+        if (pathCount > 1) {
+          dx = 1e9;
+          for (int i = 0; i < 7; i++) { if (i + 1 >= pathCount) break; dx = min(dx, segDist(p, pathPts[i].xz, pathPts[i + 1].xz)); }
+          dx += (noise(p * 0.08) - 0.5) * 8.0;
+        }
         float fairway = 1.0 - smoothstep(fairwayHalf - 2.0, fairwayHalf + 2.0, dx);
         float stripeCoord = mix(p.y, p.x, stripeDir);
         float stripe = step(0.5, fract(stripeCoord / (stripeWidth * 2.0)));
@@ -57,13 +72,27 @@ export function createGrassMaterial(opts = {}) {
         float dg = distance(p, greenCenter.xz);
         float green = 1.0 - smoothstep(greenRadius - 1.5, greenRadius + 1.5, dg);
         col = mix(col, greenColor, green * step(0.1, greenRadius));
+        // Bunkers and water
+        for (int i = 0; i < 5; i++) {
+          if (i >= bunkerCount) break;
+          vec4 b = bunkers[i];
+          float e = length((p - b.xy) / b.zw) + (noise(p * 0.6) - 0.5) * 0.25;
+          col = mix(col, sandColor * (0.9 + n * 0.2), 1.0 - smoothstep(0.85, 1.0, e));
+        }
+        if (water.z > 0.0) {
+          float e = length((p - water.xy) / water.zw) + (noise(p * 0.3) - 0.5) * 0.2;
+          float w = 1.0 - smoothstep(0.9, 1.0, e);
+          vec3 wc = waterColor + sunColor * 0.25 * pow(max(dot(reflect(-sunDir, vec3(0.0, 1.0, 0.0)), normalize(cameraPosition - vWorld)), 0.0), 16.0);
+          wc += (noise(p * 2.0 + time * 0.3) - 0.5) * 0.04;
+          col = mix(col, wc, w);
+        }
         col *= 0.85 + n * 0.3;
         // Low-sun glint (cheap Blinn-Phong)
         vec3 V = normalize(cameraPosition - vWorld);
         vec3 H = normalize(sunDir + V);
         float spec = pow(max(dot(normalize(vNormalW), H), 0.0), 60.0);
         float diff = max(dot(normalize(vNormalW), sunDir), 0.0);
-        col += sunColor * (spec * 0.35 + diff * 0.08) * (0.8 + fairway * 0.4);
+        col += sunColor * (spec * glint + diff * 0.08) * (0.8 + fairway * 0.4);
         gl_FragColor = vec4(col, 1.0);
         #include <fog_fragment>
       }`,
@@ -73,7 +102,14 @@ export function createGrassMaterial(opts = {}) {
 
 export function createRangeGround(opts = {}) {
   const size = opts.size ?? 900;
-  const geo = new THREE.PlaneGeometry(size, size, 1, 1);
+  let geo;
+  if (opts.holes?.length) {
+    // Shape with elliptical holes (e.g. a bunker bowl rendered as its own mesh). Shape y maps to world -z.
+    const shape = new THREE.Shape();
+    shape.moveTo(-size / 2, -size / 2); shape.lineTo(size / 2, -size / 2); shape.lineTo(size / 2, size / 2); shape.lineTo(-size / 2, size / 2); shape.closePath();
+    for (const hle of opts.holes) { const path = new THREE.Path(); path.absellipse(hle.x, -hle.z + (size / 2 - (opts.behind ?? 60)), hle.rx, hle.rz, 0, Math.PI * 2, false); shape.holes.push(path); }
+    geo = new THREE.ShapeGeometry(shape, 24);
+  } else geo = new THREE.PlaneGeometry(size, size, 1, 1);
   geo.rotateX(-Math.PI / 2);
   const mat = createGrassMaterial(opts);
   const mesh = new THREE.Mesh(geo, mat);

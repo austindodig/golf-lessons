@@ -52,7 +52,7 @@ export function createSkyDome({ radius = 400, sunDir = new THREE.Vector3(0.6, 0.
 export function buildEnvironment(renderer, scene, opts = {}) {
   const sunDir = (opts.sunDir || new THREE.Vector3(0.6, 0.12, -0.78)).clone().normalize();
   const sky = createSkyDome({ radius: opts.skyRadius || 400, sunDir, intensity: opts.skyIntensity ?? 1 });
-  scene.add(sky);
+  if (opts.sky !== false) scene.add(sky);
 
   // Environment map generated from the same sky so materials pick up dusk reflections.
   const pmrem = new THREE.PMREMGenerator(renderer);

@@ -29,6 +29,7 @@ export function mountAllModules(scope = document) {
       let preset = {};
       try { preset = JSON.parse(el.dataset.preset || '{}'); } catch {}
       if (el.dataset.caption) preset.caption = el.dataset.caption;
+      el.replaceChildren(); el.classList.remove('module--pending');
       mountModule(el.dataset.module, el, preset).catch((err) => { console.error(err); el.classList.add('module--failed'); });
     }
   }, { rootMargin: '600px 0px' });

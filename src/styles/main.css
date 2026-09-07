@@ -19,3 +19,17 @@
 .module--lab .hud--br { bottom: 14px; right: 14px; }
 .ctl__row--top { grid-template-columns: 110px 1fr; }
 @media (max-width: 640px) { .hud--br { display: none; } .hud--bl { display: none; } }
+
+/* Wedge clock */
+.module__stage--svg { height: auto; min-height: 0; padding: 12px 0; display: block; }
+.module__stage--svg svg { width: 100%; height: auto; max-height: 560px; display: block; }
+.clock__inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.clock__input { display: grid; grid-template-columns: 1fr 64px 20px; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); }
+.clock__input input { width: 64px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-family: var(--font-mono); font-size: 13px; }
+.clock__input em { font-style: normal; color: var(--ink-4); font-size: 11px; }
+.clock__table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+.clock__table th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-3); font-weight: 500; text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.clock__table td { padding: 10px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+.clock__table td.full { color: var(--ink-4); }
+.clock__table tr.is-current td { color: var(--ink); }
+.clock__table td.is-active { color: var(--gold-bright); font-weight: 700; background: rgba(243,207,122,0.08); border-radius: 6px; }
