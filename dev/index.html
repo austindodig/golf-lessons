@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dev: Ball Flight Lab</title>
+<link rel="stylesheet" href="/src/styles/main.css" />
+<style>body{padding:100px 0}</style>
+</head>
+<body>
+<div class="container"><div id="lab"></div></div>
+<script type="module">
+  import { mountBallFlightLab } from '/src/modules/BallFlightLab.js';
+  const q = new URLSearchParams(location.search);
+  mountBallFlightLab(document.getElementById('lab'), { club: q.get('club') || 'driver', focus: 'attack', caption: 'Release a slider to fire a shot.' });
+</script>
+</body>
+</html>

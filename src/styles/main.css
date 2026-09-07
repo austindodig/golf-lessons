@@ -1,0 +1,21 @@
+@import '@fontsource/cormorant-garamond/500.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/700.css';
+@import '@fontsource/cormorant-garamond/500-italic.css';
+@import '@fontsource/cormorant-garamond/600-italic.css';
+@import '@fontsource/manrope/400.css';
+@import '@fontsource/manrope/500.css';
+@import '@fontsource/manrope/600.css';
+@import '@fontsource/manrope/700.css';
+@import '@fontsource/manrope/800.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import './base.css';
+@import './components.css';
+@import './lesson.css';
+
+/* Lab specifics */
+.lab__mini { width: 220px; height: 150px; }
+.module--lab .hud--br { bottom: 14px; right: 14px; }
+.ctl__row--top { grid-template-columns: 110px 1fr; }
+@media (max-width: 640px) { .hud--br { display: none; } .hud--bl { display: none; } }

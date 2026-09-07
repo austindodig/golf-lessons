@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dev: Chip Calculator</title>
+<link rel="stylesheet" href="/src/styles/main.css" />
+<style>body{padding:100px 0}</style>
+</head>
+<body>
+<div class="container"><div id="chip"></div></div>
+<script type="module">
+  import { mountChipCalc } from '/src/modules/ChipCalc.js';
+  const q = new URLSearchParams(location.search);
+  mountChipCalc(document.getElementById('chip'), { club: q.get('club') || '9-iron', distance: q.get('d') ?? 20, stimp: q.get('stimp') ?? 10, caption: 'Move the landing spot and switch clubs to see how carry and roll trade off.' });
+</script>
+</body>
+</html>

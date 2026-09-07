@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dev: Flight Laws</title>
+<link rel="stylesheet" href="/src/styles/main.css" />
+<style>body{padding:100px 0}</style>
+</head>
+<body>
+<div class="container"><div id="laws"></div></div>
+<script type="module">
+  import { mountFlightLaws } from '/src/modules/FlightLaws.js';
+  const q = new URLSearchParams(location.search);
+  mountFlightLaws(document.getElementById('laws'), { face: q.get('face') ?? 0, path: q.get('path') ?? 0, caption: 'The nine flights. Start direction comes mostly from the face, curve from the path relative to the face.' });
+</script>
+</body>
+</html>

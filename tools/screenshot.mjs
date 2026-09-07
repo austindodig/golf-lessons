@@ -1,0 +1,46 @@
+// Usage: node tools/screenshot.mjs [path ...]  (paths like / or /lessons/driver/)
+// Starts a Vite dev server, renders each page in headless Chromium with WebGL,
+// logs console errors, and saves PNGs to the scratchpad shots directory.
+import { createServer } from 'vite';
+import { chromium } from 'playwright';
+import { mkdirSync } from 'node:fs';
+
+const OUT = process.env.SHOT_DIR || '/tmp/claude-0/-home-user-golf-lessons/b35ae52c-1a61-5c48-a7ac-7cb47b2accd3/scratchpad/shots';
+mkdirSync(OUT, { recursive: true });
+const paths = process.argv.slice(2).length ? process.argv.slice(2) : ['/'];
+const width = Number(process.env.SHOT_W || 1440);
+const height = Number(process.env.SHOT_H || 900);
+const scrollTo = process.env.SHOT_SCROLL ? Number(process.env.SHOT_SCROLL) : null;
+const wait = Number(process.env.SHOT_WAIT || 2500);
+const fullPage = process.env.SHOT_FULL === '1';
+
+const server = await createServer({ server: { port: 5199, strictPort: false, host: '127.0.0.1' }, logLevel: 'error' });
+await server.listen();
+const base = `http://127.0.0.1:${server.config.server.port}`;
+
+const browser = await chromium.launch({
+  executablePath: '/opt/pw-browsers/chromium',
+  args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl', '--no-sandbox'],
+});
+const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
+const page = await context.newPage();
+const errors = [];
+page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errors.push(`[${m.type()}] ${m.text()}`); });
+page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`));
+
+for (const p of paths) {
+  errors.length = 0;
+  const url = base + p;
+  const t0 = Date.now();
+  await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+  await page.waitForTimeout(wait);
+  if (scrollTo !== null) { await page.evaluate((y) => window.scrollTo(0, y), scrollTo); await page.waitForTimeout(1200); }
+  const name = (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/\//g, '_')) + (scrollTo !== null ? `_s${scrollTo}` : '');
+  const file = `${OUT}/${name}.png`;
+  await page.screenshot({ path: file, fullPage });
+  const info = await page.evaluate(() => ({ title: document.title, h: document.documentElement.scrollHeight, webgl: !!document.querySelector('canvas') }));
+  console.log(`${p} -> ${file}  (${Date.now() - t0}ms) title="${info.title}" height=${info.h} canvas=${info.webgl}`);
+  if (errors.length) console.log('  console:', errors.slice(0, 15).join('\n  '));
+}
+await browser.close();
+await server.close();

@@ -1,0 +1,28 @@
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060a0d);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(0, 1, 4);
+const ball = new THREE.Mesh(new THREE.SphereGeometry(0.6, 64, 64), new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, clearcoat: 0.6 }));
+scene.add(ball);
+const sun = new THREE.DirectionalLight(0xffc27a, 6); sun.position.set(3, 2, -2); scene.add(sun);
+const glow = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.03, 16, 128), new THREE.MeshBasicMaterial({ color: 0x6ee7a8 }));
+glow.rotation.x = 1.2; scene.add(glow);
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.6, 0.85));
+composer.addPass(new OutputPass());
+console.log('three', THREE.REVISION);
+composer.render();
