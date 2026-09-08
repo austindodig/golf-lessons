@@ -189,8 +189,8 @@ export function mountSwingViewer(root, preset = {}) {
       h('h3', { style: { margin: '6px 0 6px' } }, `${P.short} — ${P.name}`),
       h('p', { class: 'muted', style: { fontSize: '15px' } }, P.note),
       h('div.divider'),
-      h('div', { style: { fontSize: '13px', color: 'var(--ink-3)' } }, 'The ', h('b', 'gold pane'), ' is the swing plane: a sheet through the ball, tilted with the shaft. On-plane, the club stays on the sheet. ', h('b', 'The trail'), ' shows the club head path; the faint ribbon is the shaft sweeping through.'),
-      state.highlight.length ? h('div.insight', h('span.ic', { html: svgIcon.spark }), h('div', 'This lesson focuses on ', h('b', state.highlight.map((i) => `P${i}`).join(', ')), '. Use the buttons to jump straight there.')) : null,
+      h('div', { style: { fontSize: '13px', color: 'var(--ink-3)' } }, 'The ', h('b', 'gold pane'), ' is the swing plane, a sheet that runs through the ball at the angle of the shaft. When you\'re on plane the club stays on that sheet. ', h('b', 'The trail'), ' is the path of the club head, and the faint ribbon is the shaft sweeping through behind it.'),
+      state.highlight.length ? h('div.insight', h('span.ic', { html: svgIcon.spark }), h('div', 'This lesson is mostly about ', h('b', state.highlight.map((i) => `P${i}`).join(', ')), '. The buttons above will jump you straight there.')) : null,
     );
   }
   function setCamera(name, instant = false) {

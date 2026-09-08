@@ -9,8 +9,8 @@ const DEG = Math.PI / 180;
 // hip and shoulder turn (deg, + = backswing), lateral hip shift (m, + = away from target), hub drop (m).
 const FULL = {
   times: [0, 0.28, 0.52, 0.84, 0.96, 1.04, 1.11, 1.19, 1.3, 1.6],
-  theta: [null, 45, 90, 172, 92, 42, null, -45, -95, -168],
-  phi:   [null, 40, 88, 92, 105, 58, null, -40, -88, -105],
+  theta: [null, 45, 92, 152, 96, 44, null, -48, -96, -150],
+  phi:   [null, 40, 86, 96, 108, 60, null, -38, -86, -110],
   hips:  [0, 14, 28, 46, 24, 8, -38, -66, -84, -96],
   shoulders: [0, 30, 62, 96, 74, 46, -22, -58, -84, -102],
   shift: [0, 0.01, 0.02, 0.035, 0.0, -0.04, -0.09, -0.11, -0.12, -0.12],
@@ -135,8 +135,10 @@ export function createSwingModel(presetName = 'iron') {
     const head = hands.clone().addScaledVector(dir(th + ph), L2);
     const hipC = hipCenter0.clone(); hipC.z += shift; hipC.y -= drop * 0.5;
     const spineAxis = hubP.clone().sub(hipC).normalize();
-    const rotS = new THREE.Quaternion().setFromAxisAngle(spineAxis, shYaw);
-    const rotH = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0).lerp(spineAxis, 0.4).normalize(), hipYaw);
+    // Right-hand rule about the (upward) spine axis: a positive turn must carry the lead shoulder
+    // toward the ball line and under the chin, so the backswing turn is a negative rotation here.
+    const rotS = new THREE.Quaternion().setFromAxisAngle(spineAxis, -shYaw);
+    const rotH = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0).lerp(spineAxis, 0.4).normalize(), -hipYaw);
     const shoulderL = new THREE.Vector3(0, 0, -0.21).applyQuaternion(rotS).add(hubP);
     const shoulderR = new THREE.Vector3(0, 0, 0.21).applyQuaternion(rotS).add(hubP);
     const hipL = new THREE.Vector3(0, 0, -0.16).applyQuaternion(rotH).add(hipC);

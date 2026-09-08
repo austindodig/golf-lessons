@@ -134,3 +134,7 @@ input[type=range]:focus-visible { outline: 2px solid var(--green-bright); outlin
   .module__hint { display: none; }
   .module__bar { padding: 10px 14px; }
 }
+
+/* Fade used for camera cuts inside a stage */
+.stage-fade { position: absolute; inset: 0; z-index: 6; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity .18s ease; }
+.stage-fade.is-on { opacity: 1; }

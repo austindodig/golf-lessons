@@ -70,7 +70,7 @@ function footerHtml() {
     <div class="footer__grid">
       <div>
         <h4>${SITE}</h4>
-        <p>An interactive golf academy built on the ball-flight laws. Every tool on this site runs real physics in your browser so the lessons show you the cause, not just the cure.</p>
+        <p>An interactive golf academy built on the ball-flight laws. The tools run real physics in your browser, so when a lesson tells you why a shot curves, you can go and see it for yourself.</p>
       </div>
       <div><h4>Curriculum</h4>
         ${list}
@@ -87,7 +87,7 @@ function footerHtml() {
         <p class="footer__ai">Right-handed golfer shown throughout; left-handers mirror everything.</p>
       </div>
     </div>
-    <div class="footer__bottom"><span>© ${new Date().getFullYear()} ${SITE}</span><span>Play well. Practise with purpose.</span></div>
+    <div class="footer__bottom"><span>© ${new Date().getFullYear()} ${SITE}</span><span>Play well. Practise on purpose.</span></div>
   </div>
 </footer>
 <div class="grain" aria-hidden="true"></div>`;

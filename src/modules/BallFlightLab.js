@@ -94,25 +94,51 @@ export function mountBallFlightLab(root, preset = {}) {
   let ball, tee, club, tracerGroup, landingRing, motes, comet, flags = [];
   const ghosts = [];
   let current = null;         // { shot, tracer, t, playing, idx }
-  const camTarget = new THREE.Vector3(0, 0.4, -12);
-  const camLook = new THREE.Vector3(0, 0.4, -12);
+  // Camera choreography: critically damped smoothing toward a goal position and an aim point.
   const restPos = new THREE.Vector3(1.25, 1.85, 3.6);
-  const camGoal = restPos.clone();
+  const restLook = new THREE.Vector3(0, 0.4, -12);
+  const cam = { goal: restPos.clone(), aim: restLook.clone(), pos: restPos.clone(), look: restLook.clone(), vel: new THREE.Vector3(), lookVel: new THREE.Vector3(), fov: 36, fovGoal: 36, fovVel: { v: 0 } };
   const P1 = new THREE.Vector3(), P2 = new THREE.Vector3();
-  const tmp = new THREE.Vector3();
+  const tmp = new THREE.Vector3(), velDir = new THREE.Vector3();
+  const fade = h('div.stage-fade');
+  stageEl.append(fade);
+  // Unity-style SmoothDamp on one axis.
+  function smoothDamp(cur, target, velObj, key, smoothTime, dt) {
+    const omega = 2 / Math.max(smoothTime, 1e-3), x = omega * dt;
+    const ex = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+    const change = cur - target;
+    const temp = (velObj[key] + omega * change) * dt;
+    velObj[key] = (velObj[key] - omega * temp) * ex;
+    let out = target + (change + temp) * ex;
+    if ((target - cur > 0) === (out > target)) { out = target; velObj[key] = 0; }
+    return out;
+  }
+  function dampVec(v, target, vel, smoothTime, dt) {
+    v.x = smoothDamp(v.x, target.x, vel, 'x', smoothTime, dt);
+    v.y = smoothDamp(v.y, target.y, vel, 'y', smoothTime, dt);
+    v.z = smoothDamp(v.z, target.z, vel, 'z', smoothTime, dt);
+  }
+  function cutTo(pos, look) {
+    fade.classList.add('is-on');
+    setTimeout(() => {
+      cam.pos.copy(pos); cam.goal.copy(pos); cam.look.copy(look); cam.aim.copy(look);
+      cam.vel.set(0, 0, 0); cam.lookVel.set(0, 0, 0);
+      requestAnimationFrame(() => fade.classList.remove('is-on'));
+    }, 190);
+  }
 
   if (stage) {
     const { scene, camera, renderer } = stage;
     buildEnvironment(renderer, scene, { sunDir, fogDensity: 0.0055, fogColor: '#0a161b', sunIntensity: 2.2, skyIntensity: 1.0 });
-    scene.add(createRangeGround({ fairwayHalf: 26, sunDir, stripeWidth: 8 }));
+    scene.add(createRangeGround({ fairwayHalf: 26, sunDir, stripeWidth: 8, glint: 0.05 }));
     scene.add(createTreeLine({ side: 1, count: 220, seed: 3, xMin: 52, xMax: 150 }), createTreeLine({ side: -1, count: 220, seed: 7, xMin: 52, xMax: 150 }));
     scene.add(createTargetLine({ length: 320 }));
     scene.add(createDistanceArcs({ distances: [50, 100, 150, 200, 250, 300] }));
     for (const [d, x] of [[100, -7], [150, 9], [200, -5], [250, 8]]) {
       const f = createFlag({ height: 2.4 });
       f.position.set(x, 0, -d * YD);
-      const green = new THREE.Mesh(new THREE.CircleGeometry(9, 40), new THREE.MeshStandardMaterial({ color: 0x2b6b3d, roughness: 1 }));
-      green.rotation.x = -Math.PI / 2; green.position.set(x, 0.015, -d * YD);
+      const green = new THREE.Mesh(new THREE.CircleGeometry(9, 40), new THREE.MeshBasicMaterial({ color: 0x2f7a46, transparent: true, opacity: 0.35, depthWrite: false }));
+      green.rotation.x = -Math.PI / 2; green.position.set(x, 0.02, -d * YD);
       scene.add(f, green); flags.push(f);
     }
     motes = createMotes({ count: quality.tier === 'low' ? 120 : 360, center: [0, 1.5, -8], spread: [30, 4, 40] });
@@ -126,7 +152,7 @@ export function mountBallFlightLab(root, preset = {}) {
     comet.scale.set(0.6, 0.6, 1); comet.renderOrder = 30; scene.add(comet);
     tracerGroup = new THREE.Group(); scene.add(tracerGroup);
     camera.position.copy(restPos);
-    camera.lookAt(camLook);
+    camera.lookAt(restLook);
 
     stage.onFrame((dt, t) => {
       motes.userData.update(t);
@@ -134,9 +160,12 @@ export function mountBallFlightLab(root, preset = {}) {
       landingRing.userData.update(t);
       updateFlight(dt);
       // Camera: crane shot — starts behind the tee, swings out beside the flight, settles near the landing zone.
-      camera.position.lerp(camGoal, 1 - Math.exp(-dt * 2.8));
-      camLook.lerp(camTarget, 1 - Math.exp(-dt * 5));
-      camera.lookAt(camLook);
+      dampVec(cam.pos, cam.goal, cam.vel, 0.55, dt);
+      dampVec(cam.look, cam.aim, cam.lookVel, 0.32, dt);
+      camera.position.copy(cam.pos);
+      camera.lookAt(cam.look);
+      cam.fov = smoothDamp(cam.fov, cam.fovGoal, cam.fovVel, 'v', 0.6, dt);
+      if (Math.abs(camera.fov - cam.fov) > 0.01) { camera.fov = cam.fov; camera.updateProjectionMatrix(); }
       if (comet) { const d = camera.position.distanceTo(ball.position); comet.scale.setScalar(THREE.MathUtils.clamp(d * 0.012, 0.35, 2.4)); comet.position.copy(ball.position); }
     });
     stage.start();
@@ -224,9 +253,11 @@ export function mountBallFlightLab(root, preset = {}) {
     landingRing.visible = false;
     const last = F.points[F.points.length - 1];
     const side = F.curve >= 0 ? -1 : 1;                      // view from the side the ball curves away from
-    P1.set(side * (14 + F.carry * 0.05), 6 + F.apex * 0.55, last[2] * 0.42);
-    P2.set(last[0] + side * (10 + F.carry * 0.03), 4 + F.apex * 0.2, last[2] + 28);
-    stage.camera.position.copy(restPos); camLook.set(0, 0.4, -12);
+    P1.set(side * (12 + F.carry * 0.045), 5 + F.apex * 0.5, last[2] * 0.45);
+    P2.set(last[0] + side * (9 + F.carry * 0.03), 3.5 + F.apex * 0.18, last[2] + 26);
+    if (cam.pos.distanceTo(restPos) > 12) cutTo(restPos, restLook);   // broadcast-style cut back to the tee camera
+    else { cam.goal.copy(restPos); cam.aim.copy(restLook); }
+    cam.fovGoal = 36;
     comet.material.opacity = 1;
     if (quality.reducedMotion) { finishInstantly(); }
   }
@@ -259,18 +290,19 @@ export function mountBallFlightLab(root, preset = {}) {
     const last = F.points[F.points.length - 1];
     ball.position.set(last[0], BALL_RADIUS, last[2]);
     landingRing.position.set(last[0], 0.02, last[2]); landingRing.visible = true;
-    camTarget.set(last[0], 0.5, last[2]);
+    cutTo(P2, new THREE.Vector3(last[0], 0.5, last[2]));
     current.playing = false; current.landed = true;
   }
   function updateFlight(dt) {
-    if (!current) { camTarget.set(0, 0.4, -12); camGoal.copy(restPos); return; }
+    if (!current) { cam.aim.copy(restLook); cam.goal.copy(restPos); cam.fovGoal = 36; return; }
     const { flight: F } = current.result;
     const pts = F.points;
     const total = pts[pts.length - 1][3];
     const k = THREE.MathUtils.clamp(current.t / total, 0, 1);
-    // quadratic bezier restPos → P1 → P2 as the flight progresses
-    const u = 1 - k;
-    camGoal.set(0, 0, 0).addScaledVector(restPos, u * u).addScaledVector(P1, 2 * u * k).addScaledVector(P2, k * k);
+    // Crane path: quadratic bezier tee → beside the flight → behind the landing zone, eased so it starts gently.
+    const kk = Math.min(1, k / 0.85), e = kk * kk * (3 - 2 * kk), u = 1 - e;   // settle beside the landing zone before touchdown
+    cam.goal.set(0, 0, 0).addScaledVector(restPos, u * u).addScaledVector(P1, 2 * u * e).addScaledVector(P2, e * e);
+    cam.fovGoal = 36 - 7 * (e * e);
     if (current.playing) {
       current.t += dt * 1.15;
       while (current.idx < pts.length - 2 && pts[current.idx + 1][3] <= current.t) current.idx++;
@@ -280,7 +312,10 @@ export function mountBallFlightLab(root, preset = {}) {
       ball.position.set(a[0] + (b[0] - a[0]) * k, Math.max(a[1] + (b[1] - a[1]) * k, BALL_RADIUS), a[2] + (b[2] - a[2]) * k);
       ball.rotation.x -= dt * 40;
       current.tracer.geometry.instanceCount = Math.min(current.idx + 1, current.tracer.userData.total);
-      camTarget.copy(ball.position).lerp(tmp.set(0, 0.5, 0), 0.12 * (1 - k));
+      // Aim a little ahead of the ball along its flight so it rides steady in the lower-middle of the frame.
+      velDir.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize();
+      const lead = 5 + 0.06 * cam.pos.distanceTo(ball.position);
+      cam.aim.copy(ball.position).addScaledVector(velDir, lead).add(tmp.set(0, 0.35 + 0.02 * lead, 0));
       if (current.t >= pts[pts.length - 1][3]) {
         current.playing = false; current.landed = true; current.rollT = 0;
         const last = pts[pts.length - 1];
@@ -297,7 +332,7 @@ export function mountBallFlightLab(root, preset = {}) {
       tmp.copy(current.landPos).addScaledVector(current.rollDir, F.roll * YD * k);
       ball.position.copy(tmp);
       ball.rotation.x -= dt * 12 * (1 - k);
-      camTarget.set(tmp.x, 0.5, tmp.z);
+      cam.aim.set(tmp.x, 0.4, tmp.z - 2);
     }
   }
   function clearTracers(keepCurrent = false) {
