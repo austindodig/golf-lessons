@@ -53,9 +53,11 @@ export function mountHero(stageEl, heroSection) {
     camera.lookAt(look);
     // Frame the subject on the right third so the headline breathes on the left.
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-    const shift = innerWidth > 900 ? -0.105 : -0.02;
-    camera.position.addScaledVector(right, shift);
-    lookShift.copy(look).addScaledVector(right, shift);
+    const upv = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+    const mobile = innerWidth <= 900;
+    const shiftX = mobile ? -0.01 : -0.105, shiftY = mobile ? 0.095 : 0;   // phones: drop the subject below the headline
+    camera.position.addScaledVector(right, shiftX).addScaledVector(upv, shiftY);
+    lookShift.copy(look).addScaledVector(right, shiftX).addScaledVector(upv, shiftY);
     camera.lookAt(lookShift);
     ball.rotation.y = k * 2.2; ball.rotation.x = k * 0.6;
     club.rotation.y = 0.35 - k * 0.5; club.position.z = 0.035 + BALL_RADIUS + k * 0.08;
