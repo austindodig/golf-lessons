@@ -118,3 +118,19 @@ input[type=range]:focus-visible { outline: 2px solid var(--green-bright); outlin
   .ctl__row { grid-template-columns: 96px 1fr 56px; }
   .readout { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Action bar directly under the 3D stage: the primary buttons stay reachable on phones */
+.module__actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 16px; border-top: 1px solid var(--line); background: rgba(255,255,255,0.025); }
+.module__actions .btn .ic { display: inline-flex; width: 12px; height: 12px; }
+.module__actions .btn .ic svg { width: 12px; height: 12px; fill: currentColor; }
+@media (max-width: 640px) {
+  .module__actions { position: sticky; bottom: 0; z-index: 4; padding: 10px 12px; background: rgba(11,17,21,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .module__actions .btn { flex: 1 1 auto; justify-content: center; padding: 12px 14px; }
+  .module__actions .toggle, .module__actions .muted { flex-basis: 100%; }
+  .module__actions .seg { width: 100%; }
+  .module__actions .seg button { flex: 1; }
+}
+@media (max-width: 640px) {
+  .module__hint { display: none; }
+  .module__bar { padding: 10px 14px; }
+}

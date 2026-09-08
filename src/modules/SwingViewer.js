@@ -49,13 +49,13 @@ export function mountSwingViewer(root, preset = {}) {
   const trailToggle = h('button.toggle.is-on', { type: 'button', onClick: () => { state.showTrail = !state.showTrail; trailToggle.classList.toggle('is-on', state.showTrail); if (trail) { trail.visible = state.showTrail; ribbon.visible = state.showTrail; } } }, h('i'), 'Club trail');
   const ctl = h('div.ctl',
     h('div.kicker.kicker--gold', 'Scrub the swing'), scrub,
-    h('div.ctl__actions', playBtn, speedSeg, planeToggle, trailToggle),
     h('div.ctl__row', h('label', 'Positions'), posButtons),
     h('div.ctl__row', h('label', 'Shot'), clubSeg),
   );
+  const actions = h('div.module__actions', playBtn, speedSeg, planeToggle, trailToggle);
   const posInfo = h('div.stack');
   const panel = h('div.module__panel', ctl, posInfo);
-  root.append(h('div.module__bar', h('div.module__title', h('span.dot'), 'Swing Plane Viewer'), h('div.module__hint', 'drag to orbit · scroll to zoom · scrub P1–P10')), stageEl, panel);
+  root.append(h('div.module__bar', h('div.module__title', h('span.dot'), 'Swing Plane Viewer'), h('div.module__hint', 'drag to orbit · scroll to zoom · scrub P1–P10')), stageEl, actions, panel);
   if (preset.caption) root.append(h('div.module__caption', preset.caption));
 
   // Scene

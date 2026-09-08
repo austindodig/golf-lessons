@@ -89,14 +89,14 @@ export function mountChipCalc(root, preset = {}) {
     input.addEventListener('change', () => autoChip());
     ctl.append(h('div.ctl__row', h('label', s.label, s.hint ? h('small.muted', ` ${s.hint}`) : null), input, out));
   }
-  ctl.append(h('div.ctl__actions',
+  const actions = h('div.module__actions',
     h('button.btn.btn--gold.btn--sm', { type: 'button', onClick: () => chip() }, h('span.chip__play', { html: svgIcon.play }), 'Chip'),
-    h('span.muted.chip__note', 'Guideline ratios: ball back, hands ahead, putting stroke.')));
+    h('span.muted.chip__note', 'Guideline ratios: ball back, hands ahead, putting stroke.'));
   const strip = h('div.chip__strip'), spots = h('div.chip__spots');
   const insight = h('div.insight', h('span.ic', { html: svgIcon.spark }), h('div.insight__text'));
   root.append(
     h('div.module__bar', h('div.module__title', h('span.dot'), 'Chip Calculator'), h('div.module__hint', 'carry : roll guidelines · land it on the green, let it roll like a putt')),
-    stageEl,
+    stageEl, actions,
     h('div.module__panel',
       h('div', h('div.kicker.kicker--gold', 'The shot'), h('div', { style: { height: '10px' } }), ctl),
       h('div.stack', h('div.kicker', 'Where each club lands'), strip, spots, insight)),

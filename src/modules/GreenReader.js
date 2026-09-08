@@ -49,10 +49,11 @@ export function mountGreenReader(root, preset = {}) {
   const puttBtn = h('button.btn.btn--gold.btn--sm', { type: 'button', onClick: () => putt() }, h('span.ic', { html: svgIcon.play }), 'Putt');
   const solveBtn = h('button.btn.btn--sm', { type: 'button', onClick: () => applySolution() }, 'Show me the line');
   const idealToggle = h('button.toggle.is-on', { type: 'button', onClick: () => { state.showIdeal = !state.showIdeal; idealToggle.classList.toggle('is-on', state.showIdeal); if (idealLine) idealLine.visible = state.showIdeal; } }, h('i'), 'Ideal line');
-  ctl.append(h('div.ctl__row', h('label', 'Break'), dirChips), h('div.ctl__actions', puttBtn, solveBtn, idealToggle));
+  ctl.append(h('div.ctl__row', h('label', 'Break'), dirChips));
+  const actions = h('div.module__actions', puttBtn, solveBtn, idealToggle);
   const readout = h('div.readout');
   const insight = h('div.insight', h('span.ic', { html: svgIcon.spark }), h('div.insight__text'));
-  root.append(h('div.module__bar', h('div.module__title', h('span.dot'), 'Green Reader'), h('div.module__hint', 'drag to orbit · set aim and pace · release to putt')), stageEl,
+  root.append(h('div.module__bar', h('div.module__title', h('span.dot'), 'Green Reader'), h('div.module__hint', 'drag to orbit · set aim and pace · release to putt')), stageEl, actions,
     h('div.module__panel', h('div', h('div.kicker.kicker--gold', 'The putt'), h('div', { style: { height: '10px' } }), ctl), h('div.stack', h('div.kicker', 'Read'), readout, insight)));
   if (preset.caption) root.append(h('div.module__caption', preset.caption));
   function nearestDir(v) { let best = DIR_NAMES[0]; for (const d of DIR_NAMES) { const dd = Math.min(Math.abs(d[0] - v), 360 - Math.abs(d[0] - v)); if (dd < Math.min(Math.abs(best[0] - v), 360 - Math.abs(best[0] - v))) best = d; } return best[1]; }

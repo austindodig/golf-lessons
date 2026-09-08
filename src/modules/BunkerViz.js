@@ -28,10 +28,10 @@ export function mountBunkerViz(root, preset = {}) {
     ctl.append(h('div.ctl__row', h('label', s.label), input, out));
   }
   const btn = h('button.btn.btn--gold.btn--sm', { type: 'button', onClick: () => splash() }, h('span.ic', { html: svgIcon.play }), 'Splash');
-  ctl.append(h('div.ctl__actions', btn, h('span.muted', { style: { fontSize: '12px' } }, 'Release a slider to swing')));
+  const actions = h('div.module__actions', btn, h('span.muted', { style: { fontSize: '12px' } }, 'Release a slider to swing'));
   const readout = h('div.readout');
   const insight = h('div.insight', h('span.ic', { html: svgIcon.spark }), h('div.insight__text'));
-  root.append(h('div.module__bar', h('div.module__title', h('span.dot'), 'Bunker Splash'), h('div.module__hint', 'hit the sand, not the ball · the sand throws the ball out')), stageEl,
+  root.append(h('div.module__bar', h('div.module__title', h('span.dot'), 'Bunker Splash'), h('div.module__hint', 'hit the sand, not the ball · the sand throws the ball out')), stageEl, actions,
     h('div.module__panel', h('div', h('div.kicker.kicker--gold', 'Delivery'), h('div', { style: { height: '10px' } }), ctl), h('div.stack', h('div.kicker', 'What happened'), readout, insight)));
   if (preset.caption) root.append(h('div.module__caption', preset.caption));
   function syncRow(k) { const { input, out, s } = rows[k]; input.style.setProperty('--pct', `${((state[k] - s.min) / (s.max - s.min)) * 100}%`); out.textContent = `${state[k]}${s.unit}`; }

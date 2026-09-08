@@ -71,7 +71,8 @@ export function mountBallFlightLab(root, preset = {}) {
   const hitBtn = h('button.btn.btn--gold.btn--sm', { type: 'button', onClick: () => hit() }, h('span', { html: svgIcon.play, class: 'ic' }), 'Hit');
   const clearBtn = h('button.btn.btn--sm', { type: 'button', onClick: () => clearTracers() }, 'Clear tracers');
   const compareToggle = h('button.toggle.is-on', { type: 'button', onClick: () => { state.compare = !state.compare; compareToggle.classList.toggle('is-on', state.compare); if (!state.compare) clearTracers(true); } }, h('i'), 'Keep previous tracers');
-  ctl.append(h('div.ctl__row', h('label', 'Presets'), presetChips), h('div.ctl__actions', hitBtn, clearBtn, compareToggle));
+  ctl.append(h('div.ctl__row', h('label', 'Presets'), presetChips));
+  const actions = h('div.module__actions', hitBtn, clearBtn, compareToggle);
 
   const readout = h('div.readout');
   const insight = h('div.insight', h('span.ic', { html: svgIcon.spark }), h('div.insight__text', 'Change the face or the path and watch what the ball does.'));
@@ -79,7 +80,7 @@ export function mountBallFlightLab(root, preset = {}) {
   const panel = h('div.module__panel', h('div', h('div.kicker.kicker--gold', 'Delivery'), h('div', { style: { height: '10px' } }), ctl), panelRight);
   root.append(
     h('div.module__bar', h('div.module__title', h('span.dot'), 'Ball Flight Lab'), h('div.module__hint', 'release a slider to fire · every number is computed from physics')),
-    stageEl, panel,
+    stageEl, actions, panel,
   );
   if (preset.caption) root.append(h('div.module__caption', preset.caption));
 

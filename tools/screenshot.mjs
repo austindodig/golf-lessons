@@ -3,9 +3,14 @@
 // logs console errors, and saves PNGs to the scratchpad shots directory.
 import { createServer } from 'vite';
 import { chromium } from 'playwright';
+import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+// Use the sandbox Chromium when present, otherwise the locally installed Google Chrome.
+const launchTarget = () => (existsSync('/opt/pw-browsers/chromium') ? { executablePath: '/opt/pw-browsers/chromium' } : { channel: 'chrome' });
+const SHOTS = process.env.SHOT_DIR || `${tmpdir()}/fi-shots`;
 import { mkdirSync } from 'node:fs';
 
-const OUT = process.env.SHOT_DIR || '/tmp/claude-0/-home-user-golf-lessons/b35ae52c-1a61-5c48-a7ac-7cb47b2accd3/scratchpad/shots';
+const OUT = SHOTS;
 mkdirSync(OUT, { recursive: true });
 const paths = process.argv.slice(2).length ? process.argv.slice(2) : ['/'];
 const width = Number(process.env.SHOT_W || 1440);
@@ -19,7 +24,7 @@ await server.listen();
 const base = `http://127.0.0.1:${server.config.server.port}`;
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium',
+  ...launchTarget(),
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl', '--no-sandbox'],
 });
 const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
