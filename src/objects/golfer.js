@@ -82,8 +82,9 @@ function interp(times, values, t) {
   return (2 * u3 - 3 * u2 + 1) * p1 + (u3 - 2 * u2 + u) * m1 + (-2 * u3 + 3 * u2) * p2 + (u3 - u2) * m2;
 }
 
-export function createSwingModel(presetName = 'iron') {
+export function createSwingModel(presetName = 'iron', opts = {}) {
   const preset = SWING_PRESETS[presetName] || SWING_PRESETS.iron;
+  const amp = opts.amp ?? 1;      // <1 shortens the swing (clock positions), turn and wrist set scale with it
   const spec = CLUB_SPECS[preset.club];
   const L1 = 0.62;                       // shoulder hub → hands
   const L2 = spec.length - 0.05;         // hands → club head
@@ -110,8 +111,9 @@ export function createSwingModel(presetName = 'iron') {
     if (d < best) { best = d; theta7 = th; }
   }
   const c = preset.curves;
-  const theta = c.theta.map((v, i) => (i === 0 ? theta0 / DEG : i === 6 ? theta7 / DEG : v));
-  const phi = c.phi.map((v, i) => (i === 0 ? phi0 / DEG : i === 6 ? phi7 / DEG : v));
+  const theta = c.theta.map((v, i) => (i === 0 ? theta0 / DEG : i === 6 ? theta7 / DEG : theta0 / DEG + (v - theta0 / DEG) * amp));
+  const phi = c.phi.map((v, i) => (i === 0 ? phi0 / DEG : i === 6 ? phi7 / DEG : phi0 / DEG + (v - phi0 / DEG) * amp));
+  const hipsK = c.hips.map((v) => v * amp), shK = c.shoulders.map((v) => v * amp);
   const duration = c.times[c.times.length - 1];
 
   // Body proportions
@@ -125,8 +127,8 @@ export function createSwingModel(presetName = 'iron') {
   function pose(t) {
     const th = interp(c.times, theta, t) * DEG;
     const ph = interp(c.times, phi, t) * DEG;
-    const hipYaw = interp(c.times, c.hips, t) * DEG;
-    const shYaw = interp(c.times, c.shoulders, t) * DEG;
+    const hipYaw = interp(c.times, hipsK, t) * DEG;
+    const shYaw = interp(c.times, shK, t) * DEG;
     const shift = interp(c.times, c.shift, t);
     const drop = interp(c.times, c.drop, t);
 
@@ -154,12 +156,14 @@ export function createSwingModel(presetName = 'iron') {
     const elbowL = ik(shoulderL, handL, 0.31, 0.29, poleL);
     const elbowR = ik(shoulderR, handR, 0.31, 0.29, poleR);
     // Legs: knees flex toward the ball; feet stay planted.
-    const kneeL = ik(hipL, leadFoot.clone().setY(0.08), 0.45, 0.44, new THREE.Vector3(1, -0.15, -0.2 + shift * -2).normalize());
-    const kneeR = ik(hipR, trailFoot.clone().setY(0.08), 0.45, 0.44, new THREE.Vector3(1, -0.15, 0.2 + shift * 2).normalize());
+    const lf = (opts.feet?.lead || leadFoot).clone(), tf = (opts.feet?.trail || trailFoot).clone();
+    if (opts.feet?.dynamic) opts.feet.dynamic(t, lf, tf);
+    const kneeL = ik(hipL, lf.clone().setY(lf.y + 0.08), 0.45, 0.44, new THREE.Vector3(1, -0.15, -0.2 + shift * -2).normalize());
+    const kneeR = ik(hipR, tf.clone().setY(tf.y + 0.08), 0.45, 0.44, new THREE.Vector3(1, -0.15, 0.2 + shift * 2).normalize());
     return {
       t, theta: th, phi: ph, hipYaw, shYaw, shift, drop,
       hub: hubP, hands, head, hipC, spineAxis, shoulderL, shoulderR, hipL, hipR, neck, headC, handL, handR, elbowL, elbowR, kneeL, kneeR,
-      leadFoot, trailFoot, clubAngle: th + ph, roll: th - theta0,
+      leadFoot: lf, trailFoot: tf, clubAngle: th + ph, roll: th - theta0,
     };
   }
 
@@ -177,7 +181,8 @@ export function createSwingModel(presetName = 'iron') {
 }
 
 // ---------- Visual rig ----------
-export function createGolferRig(model, { color = 0x6ee7a8, accent = 0xf3cf7a } = {}) {
+export function createGolferRig(model, rigOpts = {}) {
+  const { color = 0x6ee7a8 } = rigOpts;
   const g = new THREE.Group(); g.name = 'golfer';
   const jointMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: new THREE.Color(color), emissiveIntensity: 1.6, roughness: 0.3 });
   const boneMat = new THREE.MeshStandardMaterial({ color: 0x9fe6c3, emissive: new THREE.Color(color), emissiveIntensity: 0.55, roughness: 0.5, transparent: true, opacity: 0.9 });
@@ -197,12 +202,10 @@ export function createGolferRig(model, { color = 0x6ee7a8, accent = 0xf3cf7a } =
   const footMat = new THREE.MeshStandardMaterial({ color: 0x1a2a24, emissive: new THREE.Color(color), emissiveIntensity: 0.25 });
   const footL = new THREE.Mesh(feetGeo, footMat), footR = new THREE.Mesh(feetGeo, footMat); g.add(footL, footR);
 
-  const up = new THREE.Vector3(0, 1, 0), tmp = new THREE.Vector3(), q = new THREE.Quaternion();
-  const clubAddress = new THREE.Quaternion();
+  const up = new THREE.Vector3(0, 1, 0), tmp = new THREE.Vector3(), q = new THREE.Quaternion(), qA = new THREE.Quaternion(), qB = new THREE.Quaternion();
   // Club: at address its local shaft (−cos lie, sin lie, 0) should map onto the plane's e2 direction.
   const lie = model.spec.lie * DEG;
   const localShaft = new THREE.Vector3(-Math.cos(lie), Math.sin(lie), 0);
-  clubAddress.setFromUnitVectors(localShaft, model.e2.clone());
 
   function apply(p) {
     for (const j of JOINTS) joints[j].position.copy(p[j]);
@@ -216,12 +219,18 @@ export function createGolferRig(model, { color = 0x6ee7a8, accent = 0xf3cf7a } =
     pelvis.position.copy(p.hipC); pelvis.quaternion.copy(q).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
     footL.position.copy(p.leadFoot).add(new THREE.Vector3(0.06, 0.025, 0)); footR.position.copy(p.trailFoot).add(new THREE.Vector3(0.06, 0.025, 0));
     footL.rotation.y = 0.25; footR.rotation.y = -0.1;
-    // Club: rotate the address orientation within the plane by (a − a0), then roll the face around the shaft.
-    const inPlane = new THREE.Quaternion().setFromAxisAngle(model.normal, -(p.clubAngle - model.a0));
-    const shaftWorld = model.dir(p.clubAngle).multiplyScalar(-1).normalize();
-    const roll = new THREE.Quaternion().setFromAxisAngle(shaftWorld, -p.roll * 0.9);
-    club.quaternion.copy(roll).multiply(inPlane).multiply(clubAddress);
+    // Club: point the shaft from the head at the hands, square the face to the arc, then roll it (toe up in the backswing).
+    const shaftWorld = tmp.subVectors(p.hands, p.head).normalize();
+    qA.setFromUnitVectors(localShaft, shaftWorld);
+    const zNow = new THREE.Vector3(0, 0, 1).applyQuaternion(qA);
+    const tangent = model.dir(p.clubAngle + Math.PI / 2);                 // in-plane direction of travel
+    tangent.addScaledVector(shaftWorld, -tangent.dot(shaftWorld)).normalize();
+    const zProj = zNow.addScaledVector(shaftWorld, -zNow.dot(shaftWorld)).normalize();
+    const ang = Math.atan2(new THREE.Vector3().crossVectors(zProj, tangent).dot(shaftWorld), zProj.dot(tangent));
+    qB.setFromAxisAngle(shaftWorld, ang - p.roll * 0.9);
+    club.quaternion.copy(qB).multiply(qA);
     club.position.copy(p.head);
+    if (rigOpts.hideLeadArm) { joints.elbowL.visible = joints.handL.visible = false; bones.forEach((b) => { if (['elbowL', 'handL'].includes(b.userData.b)) b.visible = false; }); }
   }
   return { group: g, joints, bones, club, apply, materials: { jointMat, boneMat, bodyMat } };
 }

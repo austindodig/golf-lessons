@@ -138,3 +138,12 @@ input[type=range]:focus-visible { outline: 2px solid var(--green-bright); outlin
 /* Fade used for camera cuts inside a stage */
 .stage-fade { position: absolute; inset: 0; z-index: 6; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity .18s ease; }
 .stage-fade.is-on { opacity: 1; }
+
+/* Swing viewer: position strip under the stage, compact stats in the corner */
+.module__now { display: flex; align-items: baseline; gap: 14px; padding: 10px 16px; border-top: 1px solid var(--line); background: rgba(243,207,122,0.05); }
+.module__now b { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--gold-bright); white-space: nowrap; }
+.module__now span { font-size: 13px; color: var(--ink-2); }
+.hud--compact .hud__stat { min-width: 62px; padding: 6px 9px; margin: 0 0 0 6px; }
+.hud--compact .hud__stat b { font-size: 15px; }
+.hud--compact .hud__stat span { font-size: 9px; }
+@media (max-width: 640px) { .module__now { flex-direction: column; gap: 2px; } .module__now b { font-size: 18px; } }

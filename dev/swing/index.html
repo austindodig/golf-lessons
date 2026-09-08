@@ -6,4 +6,5 @@
   const q = new URLSearchParams(location.search);
   const v = mountSwingViewer(document.getElementById('m'), { club: q.get('club') || 'iron', camera: q.get('cam') || 'three-quarter', highlight: [1, 4, 7], caption: 'Scrub through the ten positions.' });
   if (q.get('p')) setTimeout(() => v.jumpTo(Number(q.get('p'))), 800);
+  if (q.get('hit')) setTimeout(() => v.hitAndFollow(), 600);
 </script></body></html>

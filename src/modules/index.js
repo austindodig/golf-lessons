@@ -8,6 +8,7 @@ const loaders = {
   'chip-calc': () => import('./ChipCalc.js').then((m) => m.mountChipCalc),
   'bunker-viz': () => import('./BunkerViz.js').then((m) => m.mountBunkerViz),
   'flight-laws': () => import('./FlightLaws.js').then((m) => m.mountFlightLaws),
+  'swing-drill': () => import('./SwingDrill.js').then((m) => m.mountSwingDrill),
 };
 
 export async function mountModule(type, root, preset = {}) {

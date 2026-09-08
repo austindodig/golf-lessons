@@ -9,6 +9,7 @@ const BASE = (process.env.VITE_BASE || '/').replace(/\/?$/, '/');
 const SITE = 'Fairway Institute';
 const lessonsDir = resolve(root, 'src/content/lessons');
 const { IMAGES } = await import(pathToFileURL(resolve(root, 'src/content/images.js')).href);
+const { DRILL_VIZ } = await import(pathToFileURL(resolve(root, 'src/content/drillViz.js')).href);
 
 const files = readdirSync(lessonsDir).filter((f) => f.endsWith('.js'));
 const lessons = [];
@@ -155,7 +156,7 @@ ${navHtml(l.slug)}
       <section class="lesson__section reveal" id="drills" data-section>
         <div class="lesson__section-head"><span class="lesson__idx mono">··</span><h2>Drills</h2></div>
         <div class="drills">
-          ${l.drills.map((d, i) => `<div class="drill"><div class="drill__head"><span class="drill__num mono">${pad(i + 1)}</span><h3>${inline(d.name)}</h3><span class="drill__reps mono">${esc(d.reps)}</span></div><p class="drill__goal">${inline(d.goal)}</p><ol>${d.steps.map((s) => `<li>${inline(s)}</li>`).join('')}</ol></div>`).join('\n          ')}
+          ${l.drills.map((d, i) => { const viz = DRILL_VIZ[`${l.slug}:${d.name}`]; return `<div class="drill${viz ? ' drill--viz' : ''}"><div class="drill__text"><div class="drill__head"><span class="drill__num mono">${pad(i + 1)}</span><h3>${inline(d.name)}</h3><span class="drill__reps mono">${esc(d.reps)}</span></div><p class="drill__goal">${inline(d.goal)}</p><ol>${d.steps.map((s) => `<li>${inline(s)}</li>`).join('')}</ol></div>${viz ? `<div class="drill__viz" data-module="swing-drill" data-preset="${attrJson(viz)}"><div class="drill__viz-placeholder mono">Loading drill…</div></div>` : ''}</div>`; }).join('\n          ')}
         </div>
       </section>
 

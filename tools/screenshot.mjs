@@ -30,7 +30,7 @@ const browser = await chromium.launch({
 const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
 const page = await context.newPage();
 const errors = [];
-page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errors.push(`[${m.type()}] ${m.text()}`); });
+page.on('console', (m) => { if (['error', 'warning'].includes(m.type()) || process.env.SHOT_LOG) errors.push(`[${m.type()}] ${m.text()}`); });
 page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`));
 page.on('response', (r) => { if (r.status() >= 400) errors.push(`[http ${r.status()}] ${r.url()}`); });
 page.on('requestfailed', (r) => { if (!/cloudfront|googleapis|gstatic/.test(r.url())) errors.push(`[failed] ${r.url()} ${r.failure()?.errorText}`); });

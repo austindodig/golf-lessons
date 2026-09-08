@@ -5,7 +5,7 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { createStage } from '../core/stage.js';
 import { buildEnvironment } from '../core/environment.js';
 import { createBall, createTee, BALL_RADIUS } from '../objects/ball.js';
-import { createClub } from '../objects/clubs.js';
+import { createSwingModel, createGolferRig } from '../objects/golfer.js';
 import { createRangeGround, createTreeLine, createMotes } from '../objects/terrain.js';
 import { createTargetLine, createDistanceArcs, createFlag, createLandingRing } from '../objects/markers.js';
 import { CLUBS, shoot, impact } from '../physics/ballFlight.js';
@@ -14,7 +14,7 @@ import { sfx } from '../ui/audio.js';
 import { quality } from '../core/quality.js';
 
 const YD = 0.9144;
-const CLUB_MODEL = { 'driver': 'driver', '3-wood': '3-wood', '5-iron': '5-iron', '7-iron': '7-iron', '9-iron': '9-iron', 'pitching-wedge': 'pitching-wedge', 'sand-wedge': 'sand-wedge' };
+const SWING_OF = { 'driver': 'driver', '3-wood': '3-wood', '5-iron': 'iron', '7-iron': 'iron', '9-iron': 'iron', 'pitching-wedge': 'wedge', 'sand-wedge': 'wedge' };
 const TOUR = { driver: [113, -1.3], '3-wood': [107, -2.9], '5-iron': [94, -3.7], '7-iron': [90, -4.3], '9-iron': [85, -4.7], 'pitching-wedge': [83, -5], 'sand-wedge': [78, -5.5] };
 
 const SLIDERS = [
@@ -47,7 +47,7 @@ export function mountBallFlightLab(root, preset = {}) {
   const stageEl = h('div.module__stage');
   const hudShot = h('div.hud.hud--tl', h('div.hud__shot', h('b', 'Ready'), h('span', 'Set the sliders and hit')));
   const hudStats = h('div.hud.hud--tr');
-  const hudLaunch = h('div.hud.hud--bl');
+  const hudLaunch = h('div.hud.hud--bl.hud--compact');
   const mini = h('canvas.lab__mini', { width: 220, height: 150 });
   const hudMini = h('div.hud.hud--br', mini);
   const fallback = h('div.webgl-fallback', { style: { backgroundImage: 'url(https://d8j0ntlcm91z4.cloudfront.net/user_3FQ6hJE1ducm6cZtplfchRi2NhJ/hf_20260907_183956_6cc3ebb2-9813-4b35-a071-3f75b0ae6efb.png)' } });
@@ -91,12 +91,13 @@ export function mountBallFlightLab(root, preset = {}) {
   // ---------- 3D ----------
   const stage = createStage(stageEl, { fov: 36, near: 0.05, far: 1500, exposure: 1.05, postfx: { bloom: { strength: 0.42, radius: 0.5, threshold: 0.86 }, vignette: 0.5, grain: 0.035 } });
   const sunDir = new THREE.Vector3(0.7, 0.09, -0.71);
-  let ball, tee, club, tracerGroup, landingRing, motes, comet, flags = [];
+  let ball, tee, tracerGroup, landingRing, motes, comet, flags = [];
+  let swing = null;              // { model, rig, t, pending } — the golfer plays the swing, the ball launches at impact
   const ghosts = [];
   let current = null;         // { shot, tracer, t, playing, idx }
   // Camera choreography: critically damped smoothing toward a goal position and an aim point.
-  const restPos = new THREE.Vector3(1.25, 1.85, 3.6);
-  const restLook = new THREE.Vector3(0, 0.4, -12);
+  const restPos = new THREE.Vector3(2.2, 1.55, 3.3);
+  const restLook = new THREE.Vector3(-0.85, 0.7, -4.5);
   const cam = { goal: restPos.clone(), aim: restLook.clone(), pos: restPos.clone(), look: restLook.clone(), vel: new THREE.Vector3(), lookVel: new THREE.Vector3(), fov: 36, fovGoal: 36, fovVel: { v: 0 } };
   const P1 = new THREE.Vector3(), P2 = new THREE.Vector3();
   const tmp = new THREE.Vector3(), velDir = new THREE.Vector3();
@@ -158,6 +159,7 @@ export function mountBallFlightLab(root, preset = {}) {
       motes.userData.update(t);
       for (const f of flags) f.userData.update(t);
       landingRing.userData.update(t);
+      updateSwing(dt);
       updateFlight(dt);
       // Camera: crane shot — starts behind the tee, swings out beside the flight, settles near the landing zone.
       dampVec(cam.pos, cam.goal, cam.vel, 0.55, dt);
@@ -183,13 +185,16 @@ export function mountBallFlightLab(root, preset = {}) {
   }
   function placeClub() {
     if (!stage) return;
-    if (club) { stage.scene.remove(club); }
-    club = createClub(CLUB_MODEL[state.club] || 'iron');
     const onTee = CLUBS[state.club].loft < 20;
     tee.visible = onTee;
     ball.position.set(0, onTee ? 0.045 + BALL_RADIUS : BALL_RADIUS, 0);
-    club.position.set(0, onTee ? 0.012 : 0.002, 0.03 + BALL_RADIUS);
-    stage.scene.add(club);
+    ball.visible = true;
+    if (swing) stage.scene.remove(swing.rig.group);
+    const model = createSwingModel(SWING_OF[state.club] || 'iron');
+    const rig = createGolferRig(model);
+    rig.apply(model.pose(0));
+    stage.scene.add(rig.group);
+    swing = { model, rig, t: 0, pending: null, playing: false };
   }
   function syncSlider(k) {
     const { input, out, spec } = sliderRows[k];
@@ -241,25 +246,45 @@ export function mountBallFlightLab(root, preset = {}) {
     hudLaunch.replaceChildren(stat('Ball speed', `${fmt(L.ballSpeedMph)} mph`), stat('Launch', `${fmt(L.launch, 1)}°`), stat('Spin', `${fmt(L.spinRpm)} rpm`), stat('Axis', `${signed(L.axisTilt)}°`));
     drawMini(result);
     if (!stage) return;
-    sfx.strike(state.club === 'driver' ? 'driver' : 'iron');
+    // The golfer swings first; the ball leaves at impact (see updateSwing). Stage everything now.
+    if (current) retireTracer();
+    swing.pending = { result, L, F, C };
+    swing.t = 0; swing.playing = true;
+    if (cam.pos.distanceTo(restPos) > 12) cutTo(restPos, restLook); else { cam.goal.copy(restPos); cam.aim.copy(restLook); }
+    cam.fovGoal = 36;
+    placeBallAtRest();
+    landingRing.visible = false;
+    if (quality.reducedMotion) { launchPending(); finishInstantly(); }
+    return;
+    // eslint-disable-next-line no-unreachable
     // retire the previous tracer as a ghost
-    if (current) {
-      if (state.compare) { current.tracer.material.opacity = 0.28; current.tracer.material.color.set(0x8fa8b8); ghosts.push(current.tracer); while (ghosts.length > 4) tracerGroup.remove(ghosts.shift()); }
-      else tracerGroup.remove(current.tracer);
-    }
+  }
+  function retireTracer() {
+    if (!current) return;
+    if (state.compare) { current.tracer.material.opacity = 0.28; current.tracer.material.color.set(0x8fa8b8); ghosts.push(current.tracer); while (ghosts.length > 4) tracerGroup.remove(ghosts.shift()); }
+    else tracerGroup.remove(current.tracer);
+    current = null;
+  }
+  function placeBallAtRest() { const onTee = CLUBS[state.club].loft < 20; ball.position.set(0, onTee ? 0.045 + BALL_RADIUS : BALL_RADIUS, 0); ball.visible = true; }
+  function launchPending() {
+    const { result, L, F } = swing.pending; swing.pending = null;
+    sfx.strike(state.club === 'driver' ? 'driver' : 'iron');
     const tracer = makeTracer(F.points, L.club.loft < 20 ? 0xf3cf7a : 0x6ee7a8);
     tracerGroup.add(tracer);
     current = { result, tracer, t: 0, idx: 0, playing: true, landed: false, rollT: 0 };
-    landingRing.visible = false;
     const last = F.points[F.points.length - 1];
     const side = F.curve >= 0 ? -1 : 1;                      // view from the side the ball curves away from
     P1.set(side * (12 + F.carry * 0.045), 5 + F.apex * 0.5, last[2] * 0.45);
     P2.set(last[0] + side * (9 + F.carry * 0.03), 3.5 + F.apex * 0.18, last[2] + 26);
-    if (cam.pos.distanceTo(restPos) > 12) cutTo(restPos, restLook);   // broadcast-style cut back to the tee camera
-    else { cam.goal.copy(restPos); cam.aim.copy(restLook); }
-    cam.fovGoal = 36;
     comet.material.opacity = 1;
-    if (quality.reducedMotion) { finishInstantly(); }
+  }
+  function updateSwing(dt) {
+    if (!swing || !swing.playing) return;
+    swing.t += dt;
+    const m = swing.model;
+    swing.rig.apply(m.pose(Math.min(swing.t, m.duration)));
+    if (swing.pending && swing.t >= m.times[6]) launchPending();
+    if (swing.t >= m.duration + 0.8) swing.playing = false;
   }
   function makeTracer(points, color) {
     const positions = [], colors = [];
@@ -295,6 +320,7 @@ export function mountBallFlightLab(root, preset = {}) {
   }
   function updateFlight(dt) {
     if (!current) { cam.aim.copy(restLook); cam.goal.copy(restPos); cam.fovGoal = 36; return; }
+    if (!current.playing && !current.landed) return;
     const { flight: F } = current.result;
     const pts = F.points;
     const total = pts[pts.length - 1][3];
@@ -338,7 +364,7 @@ export function mountBallFlightLab(root, preset = {}) {
   function clearTracers(keepCurrent = false) {
     for (const g of ghosts) tracerGroup.remove(g);
     ghosts.length = 0;
-    if (!keepCurrent && current) { tracerGroup.remove(current.tracer); current = null; landingRing.visible = false; if (ball) placeClub(); }
+    if (!keepCurrent && current) { tracerGroup.remove(current.tracer); current = null; landingRing.visible = false; if (ball) placeBallAtRest(); }
     miniShots.length = keepCurrent && current ? 1 : 0;
     drawMini(null);
   }
