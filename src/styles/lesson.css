@@ -163,7 +163,7 @@
 .flyover__pin { position: relative; height: 100vh; overflow: hidden; }
 .flyover__stage { position: absolute; inset: 0; }
 .flyover__stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
-.flyover__copy { position: absolute; z-index: 3; left: var(--gutter); bottom: 10vh; max-width: 480px; pointer-events: none; }
+.flyover__copy { position: absolute; z-index: 3; left: var(--gutter); bottom: 8vh; max-width: 520px; pointer-events: none; padding: 26px 28px; border-radius: var(--radius-lg); background: rgba(6,10,13,0.62); border: 1px solid var(--line); backdrop-filter: blur(10px); }
 .flyover__copy h2 { margin: 12px 0 14px; }
 .flyover__copy p { color: var(--ink-2); }
 .flyover__hud { position: absolute; z-index: 3; right: var(--gutter); top: calc(var(--nav-h) + 20px); display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none; }

@@ -48,7 +48,7 @@ export function mountFlyover(pinEl, stageEl, hudEl) {
   }
   for (let i = 0; i < pos.count; i++) pos.setY(i, height(pos.getX(i), pos.getZ(i)));
   geo.computeVertexNormals();
-  const ground = new THREE.Mesh(geo, createGrassMaterial({ sunDir, fairwayHalf: 20, stripeWidth: 9, pathPts: path, bunkers, water, greenCenter: green, greenRadius: 16, fairwayA: '#1d4d2d', fairwayB: '#174026' }));
+  const ground = new THREE.Mesh(geo, createGrassMaterial({ sunDir, fairwayHalf: 20, stripeWidth: 9, pathPts: path, bunkers, water, greenCenter: green, greenRadius: 16, fairwayA: '#1d4d2d', fairwayB: '#174026', green: '#2f7a46' }));
   ground.receiveShadow = true;
   scene.add(ground);
   const sampleH = (x, z) => height(x, z);

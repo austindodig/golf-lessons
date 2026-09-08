@@ -55,7 +55,8 @@ export function mountHero(stageEl, heroSection) {
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const upv = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
     const mobile = innerWidth <= 900;
-    const shiftX = mobile ? -0.01 : -0.105, shiftY = mobile ? 0.095 : 0;   // phones: drop the subject below the headline
+    const shiftX = mobile ? -0.035 : -0.105, shiftY = mobile ? 0.075 : 0;   // phones: drop the subject below the headline
+    club.visible = !mobile;                                                   // the shaft would cross the headline on a phone
     camera.position.addScaledVector(right, shiftX).addScaledVector(upv, shiftY);
     lookShift.copy(look).addScaledVector(right, shiftX).addScaledVector(upv, shiftY);
     camera.lookAt(lookShift);
