@@ -20,6 +20,7 @@ export const IMAGES = {
 export function imageUrl(key, { size = 'lg' } = {}) {
   const img = IMAGES[key];
   if (!img) return '';
-  if (img.local) return size === 'sm' ? img.local.replace('.webp', '-sm.webp') : img.local;
+  const base = (import.meta.env?.BASE_URL || '/').replace(/\/$/, '');
+  if (img.local) return base + (size === 'sm' ? img.local.replace('.webp', '-sm.webp') : img.local);
   return img.remote;
 }

@@ -217,6 +217,9 @@ if (existsSync(homePath)) {
   html = html.replace(/<!-- curriculum:start -->[\s\S]*?<!-- curriculum:end -->/, `<!-- curriculum:start -->\n        ${cards}\n        <!-- curriculum:end -->`);
   html = html.replace(/<!-- nav:start -->[\s\S]*?<!-- nav:end -->/, `<!-- nav:start -->\n${navHtml('home')}\n<!-- nav:end -->`);
   html = html.replace(/<!-- footer:start -->[\s\S]*?<!-- footer:end -->/, `<!-- footer:start -->\n${footerHtml()}\n<!-- footer:end -->`);
+  // Hand-written internal links: normalise any base prefix so the page can be regenerated for another base.
+  html = html.replace(/href="(?:\/[\w-]+)?\/lessons\//g, `href="${BASE}lessons/`);
+  html = html.replace(/href="(?:\/[\w-]+)?\/favicon\.svg"/g, `href="${BASE}favicon.svg"`);
   writeFileSync(homePath, html);
 }
 console.log(`Generated ${lessons.length} lesson pages (base ${BASE})`);
