@@ -45,7 +45,7 @@ export function mountBunkerViz(root, preset = {}) {
   if (stage) {
     const { scene, camera, renderer } = stage;
     const sunDir = new THREE.Vector3(0.5, 0.16, -0.85);
-    buildEnvironment(renderer, scene, { sunDir, fogDensity: 0.02, fogColor: '#0a161b', sunIntensity: 2.4, hemiIntensity: 1.3 });
+    buildEnvironment(renderer, scene, { sunDir, fogDensity: 0.02, fogColor: '#0a161b', sunIntensity: 2.4, hemiIntensity: 1.3, rimIntensity: 0.15 });
     scene.add(createRangeGround({ fairwayHalf: 18, sunDir, stripeWidth: 3, size: 200, behind: 40, greenCenter: green, greenRadius: 7, glint: 0.08, holes: [{ x: 0, z: -0.2, rx: 2.45, rz: 1.9 }] }));
     flag = createFlag({ height: 2.2 }); flag.position.copy(green).add(new THREE.Vector3(0.5, 0, 1)); scene.add(flag);
     // Sand bowl
@@ -67,7 +67,7 @@ export function mountBunkerViz(root, preset = {}) {
     bill = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 0.06), new THREE.MeshBasicMaterial({ color: 0xf3cf7a, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }));
     bill.rotation.x = -Math.PI / 2; scene.add(bill);
     const motes = createMotes({ count: 100, center: [0, 1, -3], spread: [8, 3, 10], size: 0.08 }); scene.add(motes);
-    camera.position.set(1.15, 0.72, 1.55); camera.lookAt(-0.05, 0.05, -0.9);
+    camera.position.set(1.35, 0.95, 1.95); camera.lookAt(-0.05, -0.15, -1.3);
     // Sand grains particle system
     const N = quality.tier === 'low' ? 250 : 700;
     const pg = new THREE.BufferGeometry();

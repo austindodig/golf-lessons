@@ -42,9 +42,11 @@
 .hud__stat.is-gold b { color: var(--gold-bright); }
 .hud__stat.is-green b { color: var(--green-bright); }
 .hud__stat.is-red b { color: var(--danger); }
-.hud__shot { pointer-events: auto; padding: 10px 14px; border-radius: 12px; background: rgba(6,10,13,0.6); border: 1px solid var(--line); backdrop-filter: blur(6px); }
+.hud__shot { pointer-events: auto; max-width: min(440px, 52vw); padding: 10px 14px; border-radius: 12px; background: rgba(6,10,13,0.6); border: 1px solid var(--line); backdrop-filter: blur(6px); }
 .hud__shot b { display: block; font-family: var(--font-display); font-size: 26px; font-weight: 600; color: var(--gold-bright); line-height: 1.1; letter-spacing: 0; }
-.hud__shot span { color: var(--ink-3); font-size: 11px; }
+.hud__shot span { color: var(--ink-3); font-size: 11px; display: block; line-height: 1.4; }
+.module .hud--tl { max-width: 58%; }
+.module .hud--tr { max-width: 42%; display: flex; flex-wrap: wrap; justify-content: flex-end; }
 .hud__pos { pointer-events: auto; display: flex; gap: 4px; flex-wrap: wrap; }
 .hud__pos button { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); background: rgba(6,10,13,0.5); color: var(--ink-3); font-family: var(--font-mono); font-size: 11px; }
 .hud__pos button.is-active { color: var(--green-bright); border-color: var(--green-bright); }

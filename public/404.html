@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lost ball · Fairway Institute</title>
+<style>
+  html,body{margin:0;min-height:100%;background:#060a0d;color:#e9efeb;font-family:Manrope,system-ui,sans-serif;display:grid;place-items:center;text-align:center}
+  h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:clamp(44px,8vw,96px);margin:0 0 12px;line-height:1}
+  p{color:#8a9a91;max-width:44ch;margin:0 auto 26px;line-height:1.6}
+  a{display:inline-block;padding:14px 24px;border-radius:999px;background:linear-gradient(135deg,#6ee7a8,#35c27a);color:#04120a;font-weight:700;text-decoration:none}
+  .k{font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#6ee7a8;margin-bottom:18px}
+</style>
+</head>
+<body>
+<main>
+  <div class="k">Provisional ball</div>
+  <h1>That one is lost.</h1>
+  <p>The page you were looking for is not on this course. Head back to the first tee and play on.</p>
+  <a href="./">Back to the academy</a>
+</main>
+<script>
+  // GitHub Pages serves this at the site root; walk back to the site base if we are in a sub-path.
+  var parts = location.pathname.split('/').filter(Boolean);
+  var base = parts.length && parts[0] !== 'lessons' ? '/' + parts[0] + '/' : '/';
+  document.querySelector('a').href = base;
+</script>
+</body>
+</html>

@@ -64,7 +64,12 @@ export function initChrome() {
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  const reveals = [...document.querySelectorAll('.reveal')];
+  reveals.forEach((el) => io.observe(el));
+  // Safety net for slow devices: anything already inside the viewport reveals without waiting on the observer.
+  const sweep = () => { for (const el of reveals) { if (el.classList.contains('is-in')) continue; const r = el.getBoundingClientRect(); if (r.top < innerHeight * 0.95 && r.bottom > 0) { el.classList.add('is-in'); io.unobserve(el); } } };
+  setTimeout(sweep, 400); setTimeout(sweep, 1500);
+  let sweepTimer = 0; addEventListener('scroll', () => { if (!sweepTimer) sweepTimer = setTimeout(() => { sweepTimer = 0; sweep(); }, 150); }, { passive: true });
 
   // Lesson card completion ticks (home)
   const syncCards = () => { const p = progress.get(); document.querySelectorAll('[data-lesson-card]').forEach((c) => c.classList.toggle('is-done', !!p.done?.[c.dataset.lessonCard])); };

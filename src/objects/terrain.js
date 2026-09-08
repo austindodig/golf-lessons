@@ -107,7 +107,7 @@ export function createRangeGround(opts = {}) {
     // Shape with elliptical holes (e.g. a bunker bowl rendered as its own mesh). Shape y maps to world -z.
     const shape = new THREE.Shape();
     shape.moveTo(-size / 2, -size / 2); shape.lineTo(size / 2, -size / 2); shape.lineTo(size / 2, size / 2); shape.lineTo(-size / 2, size / 2); shape.closePath();
-    for (const hle of opts.holes) { const path = new THREE.Path(); path.absellipse(hle.x, -hle.z + (size / 2 - (opts.behind ?? 60)), hle.rx, hle.rz, 0, Math.PI * 2, false); shape.holes.push(path); }
+    for (const hle of opts.holes) { const path = new THREE.Path(); path.absellipse(hle.x, -hle.z - (size / 2 - (opts.behind ?? 60)), hle.rx, hle.rz, 0, Math.PI * 2, false); shape.holes.push(path); }
     geo = new THREE.ShapeGeometry(shape, 24);
   } else geo = new THREE.PlaneGeometry(size, size, 1, 1);
   geo.rotateX(-Math.PI / 2);

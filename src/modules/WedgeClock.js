@@ -129,8 +129,8 @@ export function mountWedgeClock(root, preset = {}) {
     });
     const c = carryFor(w, state.pos), x1 = fx0 + (c / 130) * fw;
     landing.setAttribute('cx', x1); landing.setAttribute('cy', fy0);
-    carryText.setAttribute('x', fx0); carryText.setAttribute('y', 110); carryText.textContent = `${fmt(c)} yd`;
-    carrySub.setAttribute('x', fx0 + 2); carrySub.setAttribute('y', 132); carrySub.textContent = `${w.label.toUpperCase()} · ${POS[state.pos].key} · ${Math.round(POS[state.pos].pct * 100)}% OF FULL`;
+    carryText.setAttribute('x', fx0); carryText.setAttribute('y', 165); carryText.textContent = `${fmt(c)} yd`;
+    carrySub.setAttribute('x', fx0 + 2); carrySub.setAttribute('y', 188); carrySub.textContent = `${w.label.toUpperCase()} · ${POS[state.pos].key} · ${Math.round(POS[state.pos].pct * 100)}% OF FULL`;
   }
   function drawTable() {
     const rows = WEDGES.map((w) => h('tr', { class: w.key === state.club ? 'is-current' : '' }, h('th', `${w.short} ${w.loft}°`), ...POS.map((p, i) => h('td', { class: w.key === state.club && i === state.pos ? 'is-active' : '' }, fmt(carryFor(w, i)))), h('td.full', fmt(fullOf(w)))));
