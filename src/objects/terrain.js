@@ -190,6 +190,7 @@ export function createMotes({ count = 400, spread = [40, 6, 60], center = [0, 2,
   });
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false;
+  pts.visible = false;   // drifting motes retired: they read as fireflies over the scenes
   pts.userData.update = (t) => { mat.uniforms.time.value = t; };
   return pts;
 }
